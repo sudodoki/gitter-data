@@ -23,9 +23,9 @@
               (dorun
                (map
                 ; TODO: use chan and display progress from here in prompt with loaders and stuff
-                (fn [room]
-                 (let [messages (api/most-room-messages (:id room) (:name room))]
-                   (dump/exec room messages)))
+                  (fn [room]
+                    (let [messages (api/most-room-messages (:id room) (:name room))]
+                      (dump/exec room messages)))
                 selected-rooms))))))
       (catch [:message :unathorized] _
         (do
