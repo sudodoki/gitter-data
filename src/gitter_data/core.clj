@@ -10,23 +10,21 @@
   "I don't do a whole lot ... yet."
   [& args]
   (let [prompt (prompt/init)
-        hide-global-loader (prompt/display-loader prompt)]
+        hide-global-loader! (prompt/display-loader! prompt)]
     (try+
       (let [rooms (api/my-repo-rooms)]
-        (hide-global-loader)
-        (let
-          [selected-rooms (prompt/process-checkboxes prompt (map #(hash-map :label (:name %) :value %) rooms))]
-          (do
-            (prompt/stop prompt)
-            (if (= 0 (count selected-rooms))
-              (do (println "No rooms selected. Bye-bye!") (System/exit 0))
-              (dorun
-               (map
-                ; TODO: use chan and display progress from here in prompt with loaders and stuff
-                  (fn [room]
-                    (let [messages (api/most-room-messages (:id room) (:name room))]
-                      (dump/exec room messages)))
-                selected-rooms))))))
+        (hide-global-loader!)
+        (let [labeled-rooms (for [room rooms]
+                              {:label (:name room)
+                               :value room})
+              selected-rooms (prompt/process-checkboxes! prompt labeled-rooms)]
+          (prompt/stop prompt)
+          (when (= 0 (count selected-rooms))
+            (println "No rooms selected. Bye-bye!")
+            (System/exit 0))
+          (doseq [{:keys [id name] :as room} selected-rooms
+                  :let [messages (api/most-room-messages id name)]]
+            (dump/exec! room messages))))
       (catch [:message :unathorized] _
         (do
           (prompt/stop prompt)

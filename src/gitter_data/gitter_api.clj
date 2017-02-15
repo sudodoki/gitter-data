@@ -20,6 +20,15 @@
 (def is-repo-related?
   (partial in? (list "REPO" "REPO_CHANNEL")))
 
+(defn str->long
+  [str]
+  (Long/parseLong str))
+
+(defn api-date-string->long
+  [date-string]
+  (let [formatter (java.text.SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss Z")]
+    (.getTime (.parse formatter date-string))))
+
 (defn invoke-api
   ([path]
    (invoke-api path {}))
@@ -32,12 +41,12 @@
         args
         (let
           [headers (:headers args)
-           reset-time (Long/parseLong (get headers "X-RateLimit-Reset"))
-           request-time (.getTime (.parse (java.text.SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss Z") (get headers "Date")))]
-          (do
-            (println "Gonna sleep for " (- reset-time request-time) "ms")
-            (Thread/sleep (- reset-time request-time))
-            (invoke-api path query-params)))))))
+           reset-time (str->long (get headers "X-RateLimit-Reset"))
+           request-time (api-date-string->long (get headers "Date"))
+           timeout (- reset-time request-time)]
+         (println "Gonna sleep for " timeout "ms")
+         (Thread/sleep timeout)
+         (invoke-api path query-params))))))
 
 (defn me [] (invoke-api "/v1/user/me"))
 
@@ -46,21 +55,26 @@
 (defn my-repo-rooms [] (filter (comp is-repo-related? :githubType) (my-rooms)))
 
 (defn room-messages
-  ([roomId] (room-messages roomId {:limit 50}))
-  ([roomId params] (invoke-api (str "/v1/rooms/" roomId "/chatMessages") params)))
+  ([roomId]
+   (room-messages roomId {:limit 50}))
+  ([roomId params]
+   (invoke-api (str "/v1/rooms/" roomId "/chatMessages") params)))
 
 ; TODO use channels to indicate progress instead
 (defn messages-chunk
-  ([roomId total] (messages-chunk roomId total roomId))
+  ([roomId total]
+   (messages-chunk roomId total roomId))
   ([roomId total label]
    (fn [index offset]
-     (do
-      (println (str "Requesting messages for " label " " (format "%2d" (+ 1 index)) "/" total))
-      (room-messages roomId {:limit 100 :skip (* offset 100)})))))
+     (println (str "Requesting messages for " label " " (format "%2d" (+ 1 index)) "/" total))
+     (room-messages roomId {:limit 100 :skip (* offset 100)}))))
 
 (defn most-room-messages
   "Trying to get 5000 messages from single room"
-  ([roomId] (most-room-messages roomId roomId))
+  ([roomId]
+   (most-room-messages roomId roomId))
   ([roomId label]
-   (let [total 50]
-     (reduce concat (map-indexed (messages-chunk roomId total label) (range total 0 -1))))))
+   (let [total 50
+         messages-chunk-for-room (messages-chunk roomId total label)
+         offsets-range (range total 0 -1)]
+     (reduce concat (map-indexed messages-chunk-for-room offsets-range)))))
