@@ -2,7 +2,7 @@
 
 # gitter-data
 
-This is a CLI tool to dump selected REPO related rooms messages in Gitter you are part off. Gitter API limits messages to 5000 most recent per room.
+This is a CLI tool to dump selected REPO related rooms messages in Gitter you are part off to csv. Gitter API limits messages to 5000 most recent per room.
 
 ![](http://g.recordit.co/PumFa6fB2H.gif)
 or fancy [video](https://www.youtube.com/watch?v=NkvmQLKfPZo)
