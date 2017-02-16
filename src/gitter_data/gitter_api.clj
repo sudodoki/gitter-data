@@ -27,7 +27,7 @@
 (defn api-date-string->long
   [date-string]
   (-> "EEE, dd MMM yyyy HH:mm:ss Z"
-    java.text.SimpleDateFormat.
+    (java.text.SimpleDateFormat.)
     (.parse date-string)
     (.getTime)))
 
