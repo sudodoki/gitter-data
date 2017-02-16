@@ -54,7 +54,7 @@
 
 (defn put-on-screen-info-bar!
   [screen]
-  (s/put-string screen 0 0 "Press ↓↑ to move cursor and scroll list. ESC or q to quit"))
+  (s/put-string screen 0 0 "Press ↓↑ to move cursor and scroll list. Space to toggle checkbox. Enter to continue. ESC or q to quit"))
 
 (defn put-on-screen-scroll-info!
   [screen bottom-y from count total]

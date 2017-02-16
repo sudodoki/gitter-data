@@ -26,8 +26,10 @@
 
 (defn api-date-string->long
   [date-string]
-  (let [formatter (java.text.SimpleDateFormat. "EEE, dd MMM yyyy HH:mm:ss Z")]
-    (.getTime (.parse formatter date-string))))
+  (-> "EEE, dd MMM yyyy HH:mm:ss Z"
+    java.text.SimpleDateFormat.
+    (.parse date-string)
+    (.getTime)))
 
 (defn invoke-api
   ([path]
@@ -41,8 +43,8 @@
         args
         (let
           [headers (:headers args)
-           reset-time (str->long (get headers "X-RateLimit-Reset"))
-           request-time (api-date-string->long (get headers "Date"))
+           reset-time (-> headers (get "X-RateLimit-Reset") str->long)
+           request-time (-> headers (get "Date") api-date-string->long)
            timeout (- reset-time request-time)]
          (println "Gonna sleep for " timeout "ms")
          (Thread/sleep timeout)
