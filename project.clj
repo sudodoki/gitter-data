@@ -5,7 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [cheshire "5.7.0"]
-                 [org.clojure/data.csv "0.1.3"]
+                 [org.clojure/data.json "0.2.6"]
                  [clojure-lanterna "0.9.4"]
                  [environ "1.1.0"]
                  [slingshot "0.12.2"]
